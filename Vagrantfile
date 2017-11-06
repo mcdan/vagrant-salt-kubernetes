@@ -5,19 +5,21 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
 
   numSlaves = 3
-  
+   
   config.vm.define :master do |master|
     master.vm.hostname = "master.cluster.test"
+    master.vm.network :private_network, ip: "10.0.0.10"
     master.vm.provision "shell", inline: "apt-get update"
-    master.vm.provision "shell", inline: "apt-get install -y apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-api salt-cloud salt-master salt-ssh salt-ssh"
+    master.vm.provision "shell", inline: "apt-get install -y apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-api salt-cloud salt-master salt-minion salt-ssh salt-ssh avahi-daemon libnss-mdns"
     master.vm.provision :shell, path: "./ntp-adobe.sh"
   end
 
   (1..numSlaves).each do |i|
     config.vm.define "node-#{i}" do |node|
       node.vm.hostname = "node-#{i}.cluster.test"
+      node.vm.network :private_network, ip: "10.0.0.#{i + 10}"
       node.vm.provision "shell", inline: "apt-get update"
-      node.vm.provision "shell", inline: "apt-get install -y apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-api salt-cloud salt-minion salt-ssh salt-ssh"
+      node.vm.provision "shell", inline: "apt-get install -y apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-api salt-cloud salt-minion salt-ssh salt-ssh avahi-daemon libnss-mdns"
       node.vm.provider "virtualbox" do |vb|
         disk = "./disks/gluster-s#{i}.vdi"
         unless File.exist?(disk)
