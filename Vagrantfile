@@ -1,10 +1,22 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+require 'shell'
+
+hostip=''
+if RUBY_PLATFORM.include? 'linux'
+  sh = Shell.new
+  targetAdapter = (sh.system("netstat -rn") | sh.system("grep '^0.0.0.0 '") | sh.system("tr -s ' '") | sh.system("cut -d ' ' -f 8")).to_s
+  sh = Shell.new
+  hostip = (sh.system("ifconfig #{targetAdapter}") | sh.system("grep 'inet addr'") | sh.system("cut -d ':' -f2") | sh.system("cut -d ' ' -f1")).to_s
+end
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
 
   numSlaves = 3
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+  end
    
   config.vm.define :master do |master|
     master.vm.hostname = "master"
@@ -16,9 +28,13 @@ Vagrant.configure("2") do |config|
     master.vm.provision "shell", name: "Apt Installs", inline: "apt-get update && apt-get upgrade -y && apt-get install -y apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-api salt-cloud salt-master salt-minion salt-ssh salt-ssh avahi-daemon libnss-mdns git python-pygit2"
     master.vm.provision "shell", name: "Adobe NTP Setup", path: "./ntp-adobe.sh"
     master.vm.provision "file",  source: "./master-configs", destination: "~/"
-    master.vm.provision "shell", name: "Move confs to Salt Master directory", inline: "mv /home/ubuntu/master-configs/* /etc/salt/master.d/"
-    master.vm.provision "shell", name: "Restart Salt Master to get new config", inline: "systemctl restart salt-master"
+    master.vm.provision "Move-master-confs", type: :shell, inline: "mv /home/ubuntu/master-configs/* /etc/salt/master.d/"
+    master.vm.provision "Restart-Salt-Master", type: :shell, inline: "systemctl restart salt-master"
     master.vm.synced_folder "salt-base/", "/etc/salt/base-file-root", owner: "root", group: "root"
+    master.vm.synced_folder "certs/", "/etc/k8s/certs", name: "Certs-Sync", owner: "root", group: "root"
+    master.vm.provision "Copy-Cert-Json", type: :file, source: "./cert-generation/", destination: "~/cert-generation"
+    master.vm.provision "Get-Cert-Tools", type: :shell, path: "./getCertTools.sh" 
+    master.vm.provision "Gen-Certs", type: :shell, path: "./generateCerts.sh", args: ["master.local,#{hostip}", "/etc/k8s/certs"] 
   end
 
   (1..numSlaves).each do |i|
