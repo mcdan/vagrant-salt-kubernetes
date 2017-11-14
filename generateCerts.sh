@@ -12,6 +12,7 @@ if [ $(ls -al ${targetLocation}/*.pem | wc -c) -ne 0 ]; then
 fi
 
 mkdir ~/k8s-certs
+mkdir -p ${targetLocation}
 cd ~/k8s-certs
 CERT_CONFIG_DIR=/home/ubuntu/cert-generation
 cfssl gencert -initca ${CERT_CONFIG_DIR}/ca-csr.json | cfssljson -bare ca
@@ -49,9 +50,9 @@ cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
   -config=${CERT_CONFIG_DIR}/ca-config.json \
-  -hostname=127.0.0.1,kubernetes.default,${otherhosts} \
+  -hostname=127.0.0.1,localhost,kubernetes.default,${otherhosts} \
   -profile=kubernetes \
   ${CERT_CONFIG_DIR}/kubernetes-csr.json | cfssljson -bare kubernetes
-mv *.pem /etc/k8s/certs/
+mv *.pem ${targetLocation}
 cd /
 rm -rf ~/k8s-certs
