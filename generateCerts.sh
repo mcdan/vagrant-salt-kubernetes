@@ -32,7 +32,7 @@ for i in {1..3}; do
     -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=${CERT_CONFIG_DIR}/ca-config.json \
-    -hostname=${INSTANCENAME},${INSTANCEIP} \
+    -hostname=${INSTANCENAME},${INSTANCENAME}.local,${INSTANCEIP} \
     -profile=kubernetes \
     ${INSTANCENAME}.json | cfssljson -bare ${INSTANCENAME}
     rm ${INSTANCENAME}.json

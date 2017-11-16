@@ -1,5 +1,5 @@
 {
-    "CN": "system:node:$INSTANCENAME",
+    "CN": "system:node:$INSTANCENAME.local",
     "key": {
         "algo": "rsa",
         "size": 2048
