@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
   config.vm.define :master do |master|
     master.vm.hostname = "master"
     master.vm.network :private_network, ip: "#{networkPrefix}.100"
-
+    master.vm.network "forwarded_port", guest: 6443, host: 6443
     #master.vm.provision "Upgrade Kernel", type: :shell, inline: "apt-get install -y --install-recommends linux-generic-hwe-16.04"
     #master.vm.provision :reload
 
@@ -48,7 +48,7 @@ Vagrant.configure("2") do |config|
     (1..numSlaves).each do |i|
       master.vm.provision "Add Node-#{i} DNS Record", type: :shell, inline: "grep -q -F '#{networkPrefix}.#{i + 100} node-#{i} node-#{i}.local' /etc/hosts || echo '#{networkPrefix}.#{i + 100} node-#{i} node-#{i}.local' >> /etc/hosts"
     end
-    master.vm.provision "Gen-Certs", type: :shell, path: "./generateCerts.sh", args: ["master.local,#{networkPrefix}.100,#{hostip}", "/etc/salt/base-file-root/file_root/certs"] 
+    master.vm.provision "Gen-Certs", type: :shell, path: "./generateCerts.sh", args: ["master.local,#{networkPrefix}.100,#{hostip},10.0.0.1", "/etc/salt/base-file-root/file_root/certs"] 
   end
 
   (1..numSlaves).each do |i|
