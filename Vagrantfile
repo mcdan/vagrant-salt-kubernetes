@@ -35,7 +35,6 @@ Vagrant.configure("2") do |config|
     master.vm.provision "Restart-Salt-Master", type: :shell, inline: "systemctl restart salt-master"
     master.vm.synced_folder "salt-base/", "/etc/salt/base-file-root", owner: "root", group: "root"
 
-    master.vm.provision "Copy-Cert-Json", type: :file, source: "./cert-generation/", destination: "~/cert-generation"
     master.vm.provision "Get-Cert-Tools", type: :shell, path: "./getCertTools.sh" 
     hostip=''
     if RUBY_PLATFORM.include? 'linux'
@@ -48,6 +47,7 @@ Vagrant.configure("2") do |config|
     (1..numSlaves).each do |i|
       master.vm.provision "Add Node-#{i} DNS Record", type: :shell, inline: "grep -q -F '#{networkPrefix}.#{i + 100} node-#{i} node-#{i}.local' /etc/hosts || echo '#{networkPrefix}.#{i + 100} node-#{i} node-#{i}.local' >> /etc/hosts"
     end
+    master.vm.provision "Copy-Cert-Json", type: :file, source: "./cert-generation/", destination: "~/cert-generation"
     master.vm.provision "Gen-Certs", type: :shell, path: "./generateCerts.sh", args: ["10.0.0.1,master.local,#{networkPrefix}.100,#{hostip}", "/etc/salt/base-file-root/file_root/certs"] 
     master.vm.provision "Salt-Public-IP", type: :shell, inline: "echo -e 'kubernetes:\\n  public-ip: #{hostip}' > /etc/salt/base-file-root/pillar_root/public-ip.sls" 
   end
