@@ -2,3 +2,4 @@
 *.log
 salt-base/
 *.swp
+admin.kubeconfig
