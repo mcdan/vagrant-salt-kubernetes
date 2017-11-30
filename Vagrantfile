@@ -48,7 +48,7 @@ Vagrant.configure("2") do |config|
     (1..numSlaves).each do |i|
       master.vm.provision "Add Node-#{i} DNS Record", type: :shell, inline: "grep -q -F '#{networkPrefix}.#{i + 100} node-#{i} node-#{i}.local' /etc/hosts || echo '#{networkPrefix}.#{i + 100} node-#{i} node-#{i}.local' >> /etc/hosts"
     end
-    master.vm.provision "Gen-Certs", type: :shell, path: "./generateCerts.sh", args: ["master.local,#{networkPrefix}.100,#{hostip},10.0.0.1", "/etc/salt/base-file-root/file_root/certs"] 
+    master.vm.provision "Gen-Certs", type: :shell, path: "./generateCerts.sh", args: ["10.0.0.1,master.local,#{networkPrefix}.100,#{hostip}", "/etc/salt/base-file-root/file_root/certs"] 
   end
 
   (1..numSlaves).each do |i|
