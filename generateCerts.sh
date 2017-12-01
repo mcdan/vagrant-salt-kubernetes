@@ -15,11 +15,11 @@ TEMP_DIR=$(mktemp -d)
 mkdir -p ${targetLocation}
 cd ${TEMP_DIR}
 printf "Generating Root CA!\n"
-
+NUM_WORKERS=${NUM_WORKERS:-3}
 CERT_CONFIG_DIR=/home/ubuntu/cert-generation
 cfssl gencert -initca ${CERT_CONFIG_DIR}/ca-csr.json | cfssljson -bare ca
 
-for i in {1..3}; do
+for i in $(seq 1 ${NUM_WORKERS}); do
     export INSTANCENAME="node-${i}"
     INSTANCEIP="10.0.0.$((i + 10))"
     JSON_DATA=$(envsubst < ${CERT_CONFIG_DIR}/node-template.json)

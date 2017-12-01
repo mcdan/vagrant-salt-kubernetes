@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/zesty64"
   #config.vm.box = "ubuntu/xenial64"
 
-  numSlaves = 3
+  numSlaves = 4
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "2048"
     
@@ -17,8 +17,6 @@ Vagrant.configure("2") do |config|
     master.vm.hostname = "master"
     master.vm.network :private_network, ip: "#{networkPrefix}.100"
     master.vm.network "forwarded_port", guest: 6443, host: 6443
-    #master.vm.provision "Upgrade Kernel", type: :shell, inline: "apt-get install -y --install-recommends linux-generic-hwe-16.04"
-    #master.vm.provision :reload
 
     master.vm.provision "Set-Minion-ID", type: :shell, inline: "mkdir -p /etc/salt/minion.d/; echo master.local > /etc/salt/minion_id"
     master.vm.provision "Set-salt-master", type: :shell, inline: "echo master: master.local > /etc/salt/minion.d/master.conf"
@@ -47,18 +45,17 @@ Vagrant.configure("2") do |config|
     (1..numSlaves).each do |i|
       master.vm.provision "Add Node-#{i} DNS Record", type: :shell, inline: "grep -q -F '#{networkPrefix}.#{i + 100} node-#{i} node-#{i}.local' /etc/hosts || echo '#{networkPrefix}.#{i + 100} node-#{i} node-#{i}.local' >> /etc/hosts"
     end
-    master.vm.provision "Copy-Cert-Json", type: :file, source: "./cert-generation/", destination: "~/cert-generation"
-    master.vm.provision "Gen-Certs", type: :shell, path: "./generateCerts.sh", args: ["10.0.0.1,master.local,#{networkPrefix}.100,#{hostip}", "/etc/salt/base-file-root/file_root/certs"] 
     master.vm.provision "Salt-Public-IP", type: :shell, inline: "echo -e 'kubernetes:\\n  public-ip: #{hostip}' > /etc/salt/base-file-root/pillar_root/public-ip.sls" 
+    master.vm.provision "Salt-Num-Workers", type: :shell, inline: "echo -e 'kubernetes:\\n  num-workers: #{numSlaves}' > /etc/salt/base-file-root/pillar_root/num-workers.sls" 
+
+    master.vm.provision "Copy-Cert-Json", type: :file, source: "./cert-generation/", destination: "~/cert-generation"
+    master.vm.provision "Gen-Certs", type: :shell, path: "./generateCerts.sh", args: ["10.0.0.1,master.local,#{networkPrefix}.100,#{hostip}", "/etc/salt/base-file-root/file_root/certs"], env: {"NUM_WORKERS" => "#{numSlaves}"}
   end
 
   (1..numSlaves).each do |i|
     config.vm.define "node-#{i}" do |node|
       node.vm.hostname = "node-#{i}.local"
       node.vm.network :private_network, ip: "#{networkPrefix}.#{i + 100}"
-
-      #node.vm.provision "Upgrade Kernel", type: :shell, inline: "apt-get install -y --install-recommends linux-generic-hwe-16.04"
-      #node.vm.provision :reload
 
       node.vm.provision "Set-Minion-ID", type: :shell, inline: "mkdir -p /etc/salt/minion.d/; echo node-#{i}.local > /etc/salt/minion_id"
       node.vm.provision "Set-Master-Name", type: :shell, inline: "echo master: master.local > /etc/salt/minion.d/master.conf"
@@ -80,6 +77,7 @@ Vagrant.configure("2") do |config|
       (1..numSlaves).each do |j|
         node.vm.provision "Add Node-#{j} DNS Record", type: :shell, inline: "grep -q -F '#{networkPrefix}.#{j + 100} node-#{j} node-#{j}.local' /etc/hosts || echo '#{networkPrefix}.#{j + 100} node-#{j} node-#{j}.local' >> /etc/hosts"      
       end
+      node.vm.provision "Install GlusterFS", type: :shell, path: "./gluster-install.sh", env: {"NUM_WORKERS" => "#{numSlaves}"}
     end
   end
 end
