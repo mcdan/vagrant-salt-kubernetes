@@ -63,7 +63,10 @@ Vagrant.configure("2") do |config|
 
       node.vm.provision "Add-Salt-Apt-Key", type: :shell, inline: "wget -O - https://repo.saltstack.com/apt/ubuntu/16.04/amd64/2017.7/SALTSTACK-GPG-KEY.pub | sudo apt-key add -"
       node.vm.provision "Add-Salt-Repos", type: :shell, inline: "echo deb http://repo.saltstack.com/apt/ubuntu/16.04/amd64/2017.7 xenial main > /etc/apt/sources.list.d/saltstack.list"
-      node.vm.provision "Apt-Install", type: :shell, inline: "apt-get update && apt-get upgrade -y && apt-get install -y rng-tools apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-minion"
+      node.vm.provision "Add-Gluster-Repso", type: :shell, inline: "add-apt-repository ppa:gluster/glusterfs-3.10"
+
+      node.vm.provision "Apt-Install", type: :shell, inline: "apt-get update && apt-get upgrade -y && apt-get install -y rng-tools apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-minion glusterfs-server glusterfs-client"
+
       diskPath = "%s/%s" % [VAGRANT_ROOT, "disks/storage-cluster-n#{i}.vdi"]
       unless File.exist?(diskPath)
         node.vm.provider "virtualbox" do |vb|
@@ -77,7 +80,11 @@ Vagrant.configure("2") do |config|
       (1..numSlaves).each do |j|
         node.vm.provision "Add Node-#{j} DNS Record", type: :shell, inline: "grep -q -F '#{networkPrefix}.#{j + 100} node-#{j} node-#{j}.local' /etc/hosts || echo '#{networkPrefix}.#{j + 100} node-#{j} node-#{j}.local' >> /etc/hosts"      
       end
-      node.vm.provision "Install GlusterFS", type: :shell, path: "./gluster-install.sh", env: {"NUM_WORKERS" => "#{numSlaves}"}
+      node.vm.provision "Gluster-Join", type: :file, source: "./gluster-install.sh", destination: "~/gluster-install.sh"
+      node.vm.provision "Setup GlusterFS", type: :shell, inline: "chmod +x /home/ubuntu/gluster-install.sh; nohup /home/ubuntu/gluster-install.sh > /var/log/gluster-vagrant-up.log &", env: {"NUM_WORKERS" => "#{numSlaves}"}
     end
   end
+  
+
+
 end
