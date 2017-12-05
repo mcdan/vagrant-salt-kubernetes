@@ -3,3 +3,5 @@
 salt-base/
 *.swp
 admin.kubeconfig
+heketi/heketi
+heketi/heketi.pub

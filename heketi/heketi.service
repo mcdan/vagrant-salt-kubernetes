@@ -1,0 +1,12 @@
+[Unit]
+Description=Heketi API Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/opt/bin/heketi/heketi --config /opt/conf/heketi/heketi.json
+Restart=on-failure
+RestartSec=5
+User=heketi
+
+[Install]
+WantedBy=multi-user.targetd
