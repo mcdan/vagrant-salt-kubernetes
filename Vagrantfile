@@ -57,8 +57,8 @@ Vagrant.configure("2") do |config|
     heketitopology = template.result(binding)
 
     master.vm.provision "Heketi Files", type: :file, source: "./heketi/", destination: "~/heketi"
-    master.vm.provision "Heketi Topology", type: :shell, inline: "cat <<EOF > /home/ubuntu/heketi/topology.json #{heketitopology}"
     master.vm.provision "Heketi Install", type: :shell, path: "./heketi-install.sh", args: ["/home/ubuntu/heketi/heketi.pub","/home/ubuntu/heketi/heketi", "/home/ubuntu/heketi/heketi.service", "/home/ubuntu/heketi/heketi.json"]
+    master.vm.provision "Heketi Topology", type: :shell, inline: "mkdir -p /opt/conf/heketi;cat <<EOF > /opt/conf/heketi/topology.json #{heketitopology}"
 
     master.vm.provision "Salt-Public-IP", type: :shell, inline: "echo -e 'kubernetes:\\n  public-ip: #{hostip}' > /etc/salt/base-file-root/pillar_root/public-ip.sls" 
     master.vm.provision "Salt-Num-Workers", type: :shell, inline: "echo -e 'kubernetes:\\n  num-workers: #{numSlaves}' > /etc/salt/base-file-root/pillar_root/num-workers.sls" 
@@ -80,7 +80,7 @@ Vagrant.configure("2") do |config|
       node.vm.provision "Add-Salt-Repos", type: :shell, inline: "echo deb http://repo.saltstack.com/apt/ubuntu/16.04/amd64/2017.7 xenial main > /etc/apt/sources.list.d/saltstack.list"
       node.vm.provision "Add-Gluster-Repso", type: :shell, inline: "add-apt-repository ppa:gluster/glusterfs-3.10"
 
-      node.vm.provision "Apt-Install", type: :shell, inline: "apt-get update && apt-get upgrade -y && apt-get install -y rng-tools apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-minion glusterfs-server glusterfs-client"
+      node.vm.provision "Apt-Install", type: :shell, inline: "apt-get update && apt-get upgrade -y && apt-get install -y rng-tools apt-transport-https ca-certificates curl software-properties-common ntp ntpdate ntp-doc salt-minion glusterfs-server glusterfs-client thin-provisioning-tools"
 
       diskPath = "%s/%s" % [VAGRANT_ROOT, "disks/storage-cluster-n#{i}.vdi"]
       unless File.exist?(diskPath)

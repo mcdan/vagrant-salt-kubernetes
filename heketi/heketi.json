@@ -22,8 +22,14 @@
 
                 "_executor_comment": "Execute plugin. Possible choices: mock, ssh",
                 "executor" : "ssh",
-                "user": "heketi",
-                "fstab": "/etc/fstab",
+                "sshexec" : {
+                  "user": "heketi",
+                  "keyfile": "/home/heketi/.ssh/id_rsa",
+                  "fstab": "/etc/fstab",
+                  "sudo": true 
+                },
+
+
 
                 "_db_comment": "Database file name",
                 "db" : "/opt/data/heketi/heketi.db",
