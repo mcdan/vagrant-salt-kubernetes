@@ -6,14 +6,14 @@ PRIVATE_KEY=$2
 CONFIG_FILE=$4
 SERVICE_FILE=$3
 HEKETI_VERSION=5.0.0
-USER_EXISTS=$(cat /etc/passwd | grep heketi | wc -l)
+USER_EXISTS=$(grep heketi /etc/passwd || true | wc -l)
 if [ ${USER_EXISTS} -ne 1 ]; then
   useradd heketi -m -d /home/heketi
 fi
 
 if [ -f ${CONFIG_FILE} -a ! -f /opt/conf/heketi/heketi.json ]; then
   mkdir -p /opt/conf/heketi
-  mv ${CONFIG_FILE} /opt/conf/heketi/heketi.json
+  cp ${CONFIG_FILE} /opt/conf/heketi/heketi.json
 fi
 
 if [ "$(md5sum ${CONFIG_FILE} | cut -d " " -f 1)" != "$(md5sum /opt/conf/heketi/heketi.json | cut -d " " -f 1)" ]; then
@@ -22,7 +22,7 @@ fi
 
 
 if [ -f ${SERVICE_FILE} -a ! -f /etc/systemd/system/heketi.service ]; then
-  mv ${SERVICE_FILE} /etc/systemd/system/heketi.service
+  cp ${SERVICE_FILE} /etc/systemd/system/heketi.service
 fi
 
 if [ "$(md5sum ${SERVICE_FILE} | cut -d " " -f 1)" != "$(md5sum /etc/systemd/system/heketi.service | cut -d " " -f 1)" ]; then
@@ -52,6 +52,7 @@ fi
 
 chown -R heketi:heketi /opt/bin/heketi
 mkdir -p /opt/data/heketi
+chown -R heketi:heketi /opt/conf/heketi
 chown -R heketi:heketi /opt/data/heketi
 
 if [ ! -f /etc/systemd/system/heketi.service ]; then

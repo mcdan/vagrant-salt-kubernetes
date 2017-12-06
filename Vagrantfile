@@ -57,8 +57,8 @@ Vagrant.configure("2") do |config|
     heketitopology = template.result(binding)
 
     master.vm.provision "Heketi Files", type: :file, source: "./heketi/", destination: "~/heketi"
-    master.vm.provision "Heketi Install", type: :shell, path: "./heketi-install.sh", args: ["/home/ubuntu/heketi/heketi.pub","/home/ubuntu/heketi/heketi", "/home/ubuntu/heketi/heketi.service", "/home/ubuntu/heketi/heketi.json"]
     master.vm.provision "Heketi Topology", type: :shell, inline: "mkdir -p /opt/conf/heketi;cat <<EOF > /opt/conf/heketi/topology.json #{heketitopology}"
+    master.vm.provision "Heketi Install", type: :shell, path: "./heketi-install.sh", args: ["/home/ubuntu/heketi/heketi.pub","/home/ubuntu/heketi/heketi", "/home/ubuntu/heketi/heketi.service", "/home/ubuntu/heketi/heketi.json"]
 
     master.vm.provision "Salt-Public-IP", type: :shell, inline: "echo -e 'kubernetes:\\n  public-ip: #{hostip}' > /etc/salt/base-file-root/pillar_root/public-ip.sls" 
     master.vm.provision "Salt-Num-Workers", type: :shell, inline: "echo -e 'kubernetes:\\n  num-workers: #{numSlaves}' > /etc/salt/base-file-root/pillar_root/num-workers.sls" 
