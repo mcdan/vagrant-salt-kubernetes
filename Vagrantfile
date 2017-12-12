@@ -23,6 +23,7 @@ Vagrant.configure("2") do |config|
     master.vm.hostname = "master"
     master.vm.network :private_network, ip: "#{networkPrefix}.100"
     master.vm.network "forwarded_port", guest: 6443, host: 6443
+    master.vm.network "public_network", type: "dhcp"
 
     master.vm.provision "Set-Minion-ID", type: :shell, inline: "mkdir -p /etc/salt/minion.d/; echo master.local > /etc/salt/minion_id"
     master.vm.provision "Set-salt-master", type: :shell, inline: "echo master: master.local > /etc/salt/minion.d/master.conf"
