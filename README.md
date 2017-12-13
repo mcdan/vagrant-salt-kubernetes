@@ -95,7 +95,8 @@ If you have started a cluster before, remember to clear out your certs!
     ```
 1. `curl http://<ip>:30080/`
     And this should produce this output:
-    ```default backend - 404%
+    ```
+    default backend - 404%
     ```
 
 What happend?!
