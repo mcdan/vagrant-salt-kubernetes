@@ -3,7 +3,7 @@
   "clusters" : [
     {
       "nodes" : [
-        <% (1..numSlaves).each do |i| %>
+        <% (1..numWorkers).each do |i| %>
             {
             "node": {
                 "hostnames": {
@@ -19,7 +19,7 @@
             "devices": [
                 "/dev/sdc"
             ]
-        }<%if (i != numSlaves)%>,<%end%>
+        }<%if (i != numWorkers)%>,<%end%>
         <% end %>
       ]
     }

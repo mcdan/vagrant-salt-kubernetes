@@ -10,6 +10,19 @@ If you have started a cluster before, remember to clear out your certs!
 
     You may be asked about bridging this is the adapter you want to be able to see the ingress address from, so chose correctly. ( Probably not docker0 )
 1. Now go get a coffee.
+    You'll know the VM creation is done when you see somethign like this:
+    ```bash
+    Creating cluster ... ID: 20e5c29fbd15d6cc49d4267133b1f8df
+        Creating node 172.17.8.101 ... ID: 8d975dc376a6e0aab07f8339f6cb6bd7
+                Adding device /dev/sdc ... OK
+        Creating node 172.17.8.102 ... ID: 2ae5ec96fe57c6e543bf224c369f4911
+                Adding device /dev/sdc ... OK
+        Creating node 172.17.8.103 ... ID: c57abff0fa232c84b4a173f0a8b016e5
+                Adding device /dev/sdc ... OK
+        Creating node 172.17.8.104 ... ID: 9b7a9cc0d4e71be9f0401e73fef2d36e
+                Adding device /dev/sdc ... OK
+
+    ```
 1. `vagrant ssh master -c "sudo salt '*' test.ping"`
 
     ```bash
