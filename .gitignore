@@ -1,6 +1,5 @@
 .vagrant/
 *.log
-salt-base/
 *.swp
 admin.kubeconfig
 provision-scripts/heketi/heketi

@@ -1,0 +1,3 @@
+[submodule "salt-base"]
+	path = salt-base
+	url = https://github.com/mcdan/salt-k8s.git
