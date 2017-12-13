@@ -6,7 +6,7 @@ You'll need:
 If you have started a cluster before, remember to clear out your certs!
 `rm -rf salt-base/file_root/certs/*`
 # Create Cluster
-1. `./up-all.sh`
+1. `export NUM_WORKERS=4 ./up-all.sh`
 
     You may be asked about bridging this is the adapter you want to be able to see the ingress address from, so chose correctly. ( Probably not docker0 )
 1. Now go get a coffee.
