@@ -1,3 +1,7 @@
+This was the output of me following along with great Tutorial from https://github.com/kelseyhightower/kubernetes-the-hard-way. No way I could have done any of this without that documentation!
+# TODO
+* Get Cilium working
+
 # Getting Started
 You'll need:
  * vagrant (tested with 2.0.0)
