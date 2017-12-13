@@ -6,7 +6,9 @@ You'll need:
 If you have started a cluster before, remember to clear out your certs!
 `rm -rf salt-base/file_root/certs/*`
 # Create Cluster
-1. `export NUM_WORKERS=4 ./up-all.sh`
+1. `export NUM_WORKERS=4`
+    This sets the number of workes you'll create. Less than 3 isn't really helpful.
+1. `./tools/up-all.sh`
 
     You may be asked about bridging this is the adapter you want to be able to see the ingress address from, so chose correctly. ( Probably not docker0 )
 1. Now go get a coffee.
@@ -37,7 +39,6 @@ If you have started a cluster before, remember to clear out your certs!
     master.local:
         True    
     ```
-1. `./heketi-configure.sh`
 1. `vagrant ssh master -c "sudo salt '*' --async state.highstate"`
 
     this will give you a job ID for keeping an eye on things
@@ -45,7 +46,7 @@ If you have started a cluster before, remember to clear out your certs!
 1. `vagrant ssh master -c "watch -c -d -n 30 sudo salt \'*\' saltutil.find_job <jobid>"`
 
     This allows you to keep an eye on the nodes as they get setup, when this output disappears your cluster is ready. Don't be alarmed if you see things like the minion did not return, sometimes they are pretty busy.
-1. `./getAdminConfig.sh`
+1. `./tools/getAdminConfig.sh`
 
 
     This will make an admin.kubeconfig available for you to use on a machine to communicate with the cluster. Move this into ~./kube/config or reference it in kubectl commands
@@ -76,10 +77,31 @@ If you have started a cluster before, remember to clear out your certs!
 1. Make sure you see "gluster" here: https://127.0.0.1:PORT/#!/storageclass?namespace=_all
 
 # Deploy an App
-1. `vagrant ssh master -c "ifconfig enp0s9"`
+1. `vagrant ssh master -c "ifconfig enp0s9 | grep 'inet ' | tr -s ' ' | cut -d ' ' -f3"`
     This is the IP that should be routable to your master from the LAN.
 1. Edit your hosts file on the machine you want to talk to the cluster add:
     <IP> sample.com
 1. `vagrant ssh master -c "/opt/bin/kubernetes/server/bin/kubectl create -f /opt/k8s/conf/deploys/gluster/nginx-gluster.yaml"`
-1. `curl http://sample.com/`
-1. `curl http://<ip>/`
+1. `curl http://sample.com:30080/`
+    This should produce this output:
+    ```
+    <html>
+    <head><title>403 Forbidden</title></head>
+    <body bgcolor="white">
+    <center><h1>403 Forbidden</h1></center>
+    <hr><center>nginx/1.11.1</center>
+    </body>
+    </html>
+    ```
+1. `curl http://<ip>:30080/`
+    And this should produce this output:
+    ```default backend - 404%
+    ```
+
+What happend?!
+The cluster is provisioned out of the gate with a few extras.
+1. Gluster a distrubuted file system, which the "App" mounts
+1. Nginx Ingress which the App requests.
+
+When you hit sample.com you are hitting the routing rule for the app you deployed which is an nginx container that mounts a gluster disk. When you hit the public IP directly you don't match any rules and get the "default backend".
+
