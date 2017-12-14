@@ -49,7 +49,7 @@ cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
   -config=${CERT_CONFIG_DIR}/ca-config.json \
-  -hostname=127.0.0.1,localhost,kubernetes.default,${otherhosts} \
+  -hostname=127.0.0.1,localhost,kubernetes.default,kubernetes,${otherhosts} \
   -profile=kubernetes \
   ${CERT_CONFIG_DIR}/kubernetes-csr.json | cfssljson -bare kubernetes
 
