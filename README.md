@@ -110,3 +110,12 @@ The cluster is provisioned out of the gate with a few extras.
 
 When you hit sample.com you are hitting the routing rule for the app you deployed which is an nginx container that mounts a gluster disk. When you hit the public IP directly you don't match any rules and get the "default backend".
 
+# Monitoring
+If you want monitoring which you should above and beyond the dashboard go and install coreos' prometheus operator:
+```
+git clone https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus`
+cd prometheus-operator
+cd contrib/kube-prometheus/
+hack/cluster-monitoring/deploy
+kubectl apply -f manifests/k8s/self-hosted
+```

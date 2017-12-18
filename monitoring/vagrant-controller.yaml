@@ -1,0 +1,13 @@
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: kube-controller-manager-endpoint
+  namespace: kube-system
+  labels:
+    k8s-app: kube-controller-manager
+subsets:
+  - addresses:
+      - ip: 172.17.8.100
+    ports:
+      - port: 10252
+        name: http-metrics
